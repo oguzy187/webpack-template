@@ -4,10 +4,11 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const fse = require('fs-extra')
-const recursiveSync = require('recursive-readdir-sync');
+const recursiveSync = require('recursive-readdir-sync')
 
 const postCSSPlugins = [
     require('postcss-import'),
+    require('postcss-url'),
     require('postcss-mixins'),
     require('postcss-simple-vars'),
     require('postcss-nested'),
@@ -17,7 +18,7 @@ const postCSSPlugins = [
 ]
 
 let pages = recursiveSync('./app/templates').filter(function(file) {
-    return file.endsWith('.html');
+    return file.endsWith('.html') && !file.includes('archiv');
 }).map(function(page) {
     page = page.replace('app\\templates\\', '');
     page = page.replace(/\\/g, '/');
@@ -25,12 +26,7 @@ let pages = recursiveSync('./app/templates').filter(function(file) {
         filename: `../../templates/${page}`,
         template: `./app/templates/${page}`,
         minify: {
-            collapseWhitespace: true,
-            removeComments: false,
-            removeRedundantAttributes: true,
-            removeScriptTypeAttributes: true,
-            removeStyleLinkTypeAttributes: true,
-            useShortDoctype: true
+            removeComments: false
         }
     });
 });
@@ -41,10 +37,6 @@ module.exports = {
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename: 'styles.[chunkhash].css'
-        }),
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
         })
     ]),
     output: {
@@ -63,7 +55,7 @@ module.exports = {
                 exclude: /(node_modules)/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader?url=false',
+                    'css-loader',
                     {
                         loader: 'postcss-loader',
                         options: {
@@ -77,11 +69,11 @@ module.exports = {
                 exclude: /(node_modules)/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader?url=false',
+                    'css-loader',
                     {
-                        loader: 'postcss-loader',
+                        loader: 'resolve-url-loader',
                         options: {
-                            plugins: postCSSPlugins
+                            keepQuery: true,
                         }
                     },
                     'sass-loader'
@@ -98,10 +90,5 @@ module.exports = {
                 }
             }
         ]
-    },
-    stats: {
-        all: false,
-        assets: true,
-        timings: true
     }
 }
