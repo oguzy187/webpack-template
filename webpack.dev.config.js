@@ -12,8 +12,7 @@ const postCSSPlugins = [
     require('postcss-simple-vars'),
     require('postcss-nested'),
     require('postcss-hexrgba'),
-    require('autoprefixer'),
-    require('cssnano')
+    require('autoprefixer')
 ]
 
 let pages = recursiveSync('./app/templates').filter(function(file) {
@@ -47,7 +46,16 @@ module.exports = {
         chunkFilename: '[name].[chunkhash].js',
         path: path.resolve(__dirname, 'public/cache/dist')
     },
-    mode: "production",
+    // devServer: {
+    //     before: function(app, server) {
+    //         server._watch('./app/**/*.html');
+    //     },
+    //     contentBase: path.join(__dirname, 'app/templates'),
+    //     hot: true,
+    //     port: 45214,
+    //     host: '0.0.0.0'
+    // },
+    mode: "development",
     watch: true,
     optimization: {
         splitChunks: {chunks: 'all'}
@@ -55,8 +63,14 @@ module.exports = {
     module: {
         rules: [
             {
+                test: require.resolve('jquery'),
+                loader: 'expose-loader',
+                options: {
+                    exposes: ['$','jQuery']
+                }
+            },
+            {
                 test: /\.css$/i,
-                exclude: /(node_modules)/,
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader',
@@ -92,7 +106,6 @@ module.exports = {
             },
             {
                 test: /\.less$/i,
-                exclude: /(node_modules)/,
                 use: [
                     MiniCssExtractPlugin.loader,
                     'css-loader',
@@ -117,7 +130,7 @@ module.exports = {
                 test: /\.(woff|woff2|eot|ttf|svg)$/i,
                 loader: 'url-loader',
                 options: {
-                    name: '[name].[ext]',
+                    //name: '[name].[ext]',
                     outputPath: 'fonts/',
                     publicPath: 'fonts/',
                     limit: 1024
@@ -125,10 +138,11 @@ module.exports = {
             },
             {
                 test: /\.(png|jpe?g|gif)$/i,
-                loader: 'file-loader',
+                loader: 'url-loader',
                 options: {
                     outputPath: 'images/',
-                    publicPath: 'images/'
+                    publicPath: 'images/',
+                    limit: 1024
                 }
             },
             {
