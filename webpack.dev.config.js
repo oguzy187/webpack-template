@@ -35,6 +35,11 @@ module.exports = {
           filename: 'js/[name].[chunkhash].js',
           chunkFilename: 'js/[name].[chunkhash].js'
      },
+     resolve: {
+          alias: {
+               thirdparty: path.resolve(__dirname, 'app/assets/third-party/')
+          }
+     },
      plugins: pages.concat([
           new CleanWebpackPlugin(),
           new MiniCssExtractPlugin({
